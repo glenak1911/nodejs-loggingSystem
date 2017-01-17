@@ -4,8 +4,8 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-
-var index = require('./routes/index');
+var session = require('express-session');
+var routes = require('./routes/index');
 var users = require('./routes/users');
 
 var app = express();
@@ -17,14 +17,37 @@ app.set('view engine', 'jade');
 // uncomment after placing your favicon in /public
 //app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
 app.use(logger('dev'));
-app.use(bodyParser.json());
+app.use(bodyParser.json({extended: false}));
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(require('less-middleware')(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'public')));
+//app.use(bodyParser({extended: false}));
 
-app.use('/', index);
-app.use('/users', users);
+var session = require('express-session');
+app.use(session({ secret: 'app', cookie: { maxAge: 60000 }}));
+var verifyUser = function(req, res, next) {
+    if(req.session.loggedIn) {
+        next(); 
+    } else {
+        var username = "admin", password = "admin";
+        if(req.body.username === username && 
+        req.body.password === password) {
+            req.session.loggedIn = true;
+            res.redirect('/');
+        } else {
+            res.render("login", {title: "Please log in."});
+        }
+
+    }   
+}
+app.all('/', verifyUser, routes);
+
+var logout = function(req, res, next) {
+    req.session.loggedIn = false;
+    res.redirect('/');
+}
+app.all('/logout', logout);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
