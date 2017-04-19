@@ -1,5 +1,5 @@
-#NodeJS Logging System
-This repo contains a logging system written in Javascript, using NodeJS
+#NodeJS Log in System
+This repo contains a log in system written in Javascript, using NodeJS
 
 ##Synopsis
 The middleware architecture, is the base of the library and gives us the power to write complex but, at the same time, flexible applications. The example we used was a simple one. 
